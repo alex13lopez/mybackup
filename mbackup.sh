@@ -4,9 +4,16 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 2.2.1-rc
+# Version: 2.3.0a
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 ###########################################################################################################
+
+BkPath=/mnt/Backup # This is the path where the backup will be stored
+BFolder=Backup # This is the name of the mountpoint where your Backup is stored
+DPath=/mnt/Data # This is the path where the data to be backuped will be taken from
+DFolder=Data # This is the name of the mountpoint where your Data is stored
+DtoBackup=('/mnt/Data/IT' '/mnt/Data/Music') # Put the folders you want to backup between '' and separated by spaces
+Device=/dev/sda1 # This is the device where the backup is stored
 
 function usage(){
 	echo """Usage: mbackup <OPTION>    
@@ -21,52 +28,65 @@ function usage(){
 }
 
 function quit(){
-	if [[ -d /mnt/Backup/IT ]]; then umount /dev/sda1; fi
+	if ls $BkPath; then umount -f $Device; fi
 	exit 0
 }
 
 function backup(){
-	if [[ ! -d /mnt/Backup/IT ]]; then mount /dev/sda1; fi
-	cp -ru --no-preserve=all /mnt/Data/IT /mnt/Backup/
-	cp -ru --no-preserve=all /mnt/Data/Music /mnt/Backup/
-	find /mnt/Backup -type d -exec chmod -R 770 {} \;
-	find /mnt/Backup -type f -exec chmod -R 660 {} \;
-	umount /dev/sda1
+	if ! ls $BkPath; then mount $Device; fi
+	for dir in ${DtoBackup[@]} 
+	do
+		cp -ruv --no-preserve=all $dir $BkPath
+	done
+	find $BkPath -type d -exec chmod -R 770 {} \;
+	find $BkPath -type f -exec chmod -R 660 {} \;
+	umount $Device
 	exit 0
 }
 
 function browse(){
 	clear
-	if [[ ! -d /mnt/Backup/IT ]]; then mount /dev/sda1; fi
-	nautilus /mnt/Backup
-	umount /dev/sda1
+	if ! ls $BkPath; then mount $Device; fi
+	nautilus $BkPath
+	echo "Type enter when you finished..."
+	read pause
+	ps aux | grep nautilus | tr -s ' ' | cut -d' ' -f2 | while read i; do kill -9 $i; done
+	umount -f $Device
 	exit 0
 }
 
 function recovery(){
 	clear
-	if [[ ! -d /mnt/Backup/IT ]]; then mount /dev/sda1; fi
+	if ! ls $BkPath; then mount $Device; fi
+	if [ ! -d $DPath/recovered ]; then mkdir $DPath/recovered; fi
 	echo "Welcome to recovery tool"
 	echo
 	while true
 	do
-	      echo -n "Which folder/file do you want to recover: "
-		read file
-		find /mnt/Data/IT/programming/myrepo/bash_scripts/myBackup/testenv/testb -name $file -exec cp -i {} /mnt/Data/IT/programming/myrepo/bash_scripts/myBackup/testenv/testd \;
+	    echo -n "Which folder/file do you want to recover: "
+		read name
+		file=$(find $BkPath -name $name)
+		if $file; then
+			echo "Is $file the file/folder you want to recover?(Y/n)"
+			read choice
+			if [ $choice == "\n" ] || [ $choice == "Y" ] || [ $choice == "y" ]; then cp -ri $file $DPath/recovered
+			elif [ $choice == "N" ] || [ $choice == "n" ]; then continue
+			else echo "Assuming yes..." && continue 
+			fi
 		echo -n "Continue recovering? (Y/n): "
 		read choice
 		if [ $choice == "\n" ] || [ $choice == "Y" ] || [ $choice == "y" ]; then continue
 		elif [ $choice == "N" ] || [ $choice == "n" ]; then break
-		else echo "Option not correct, assuming yes..." && continue
+		else echo "Assuming yes..." && continue
 		fi
 	done
 }
 
 function clean(){
-	for bfile in `find /mnt/Backup/`
+	for bfile in `find $BkPath`
 	do
-		dfile=$(echo $bfile | sed 's/Backup/Data/')
-		if [[ ! $(find /mnt/Data -wholename $dfile) ]]; then rm -rf $bfile; fi
+		dfile=$(echo $bfile | sed "s/$BFolder/$DFolder/")
+		if ! find $DPath -wholename $dfile; then rm -rf $bfile; fi
 	done
 }
 
