@@ -83,6 +83,7 @@ function recovery(){
 			continue
 		fi
 	done
+	umount -f $Device
 }
 
 function clean(){
@@ -97,10 +98,12 @@ function clean(){
 		continue
 	fi
 	done
+	umount -f $Device
 }
 
 function menu(){
-	while true; do
+	while true
+	do
 		clear
 		echo "###################################################################"
 		echo
@@ -144,13 +147,3 @@ else
 	fi
 fi
 exit 0
-	
-	
-	
-	
-	
-	
-	
-	
-
-
