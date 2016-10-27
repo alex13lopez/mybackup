@@ -4,7 +4,7 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 2.4.1a
+# Version: 2.5.0 stable
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 ###########################################################################################################
 
@@ -70,13 +70,13 @@ function recovery(){
 			read choice
 			if [ ! $choice ] || [ $choice == "Y" ] || [ $choice == "y" ]; then cp -ri $file $DPath/recovered
 			elif [ $choice == "N" ] || [ $choice == "n" ]; then continue
-			else echo "Assuming yes..." && cp -ri $file $DPath/recovered
+			else echo "Assuming yes..."; cp -ri $file $DPath/recovered
 			fi
 			echo -n "Continue recovering? (Y/n): "
 			read choice
 			if [ ! $choice ] || [ $choice == "Y" ] || [ $choice == "y" ]; then continue
 			elif [ $choice == "N" ] || [ $choice == "n" ]; then break
-			else echo "Assuming yes..." && continue
+			else echo "Assuming yes..."; continue
 			fi
 		else
 			echo "You didn't write anything!"
@@ -90,11 +90,11 @@ function clean(){
 	find "$BkPath" -mindepth 1 | while read bfile
 	do
 	dfile=$(echo "$bfile" | sed "s/$BFolder/$DFolder/")
-	found=$(find "$DPath" -wholename "$dfile")
-	if [[ ! "$found" ]]; then
+	if [[ ! -e "$dfile" ]]; then
+		echo "File $dfile not found, deleting..."
 		rm -rf "$bfile"
 	else
-		echo "Found file $dfile in $DPath, skipping deletion..."
+		continue
 	fi
 	done
 }
