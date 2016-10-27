@@ -4,7 +4,7 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 2.5.0 stable
+# Version: 2.5.0b
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration, these are just an example.
 ###########################################################################################################
@@ -66,35 +66,36 @@ function browse(){
 }
 
 function recovery(){
-	clear
-	if ! df | grep -q $Device; then mount $Device $BkPath; fi
-	if [ ! -d $DPath/recovered ]; then mkdir $DPath/recovered; fi
-	echo "${blue}Welcome to recovery tool${reset}"
-	echo
-	while true
-	do
-	    echo -n "${bold}${green}Which folder/file do you want to recover: ${reset}"
-		read name
-		file=$(find $BkPath -name $name)
-		if $file; then
-			echo "${bold}${cyan}Is $file the file/folder you want to recover?(Y/n) ${reset}"
-			read choice
-			if [ ! $choice ] || [ $choice == "Y" ] || [ $choice == "y" ]; then cp -ri $file $DPath/recovered
-			elif [ $choice == "N" ] || [ $choice == "n" ]; then continue
-			else echo "${bold}${yellow}Assuming yes...${reset}"; cp -ri $file $DPath/recovered
-			fi
-			echo -n "${bold}${green}Continue recovering? (Y/n): ${reset}"
-			read choice
-			if [ ! $choice ] || [ $choice == "Y" ] || [ $choice == "y" ]; then continue
-			elif [ $choice == "N" ] || [ $choice == "n" ]; then break
-			else echo "${bold}${yellow}Assuming yes...${reset}"; continue
-			fi
-		else
-			echo "${red}You didn't write anything!${reset}"
-			continue
-		fi
-	done
-	umount -f $Device
+	echo "${red}This function is being debugged, so it's not available at the moment, sorry for the inconvinents"
+#	clear
+#	if ! df | grep -q $Device; then mount $Device $BkPath; fi
+#	if [ ! -d $DPath/recovered ]; then mkdir $DPath/recovered; fi
+#	echo "${bold}${blue}Welcome to recovery tool${reset}"
+#	echo
+#	while true
+#	do
+#	    echo -n "${bold}${green}Which folder/file do you want to recover: ${reset}"
+#		read name
+#		file=$(find $BkPath -name $name)
+#		if $file; then
+#			echo "${bold}${cyan}Is $file the file/folder you want to recover?(Y/n) ${reset}"
+#			read choice
+#			if [ ! $choice ] || [ $choice == "Y" ] || [ $choice == "y" ]; then cp -ri $file $DPath/recovered
+#			elif [ $choice == "N" ] || [ $choice == "n" ]; then continue
+#			else echo "${bold}${yellow}Assuming yes...${reset}"; cp -ri $file $DPath/recovered
+#			fi
+#			echo -n "${bold}${green}Continue recovering? (Y/n): ${reset}"
+#			read choice
+#			if [ ! $choice ] || [ $choice == "Y" ] || [ $choice == "y" ]; then continue
+#			elif [ $choice == "N" ] || [ $choice == "n" ]; then break
+#			else echo "${bold}${yellow}Assuming yes...${reset}"; continue
+#			fi
+#		else
+#			echo "${red}You didn't write anything!${reset}"
+#			continue
+#		fi
+#	done
+#	umount -f $Device
 }
 
 function clean(){
