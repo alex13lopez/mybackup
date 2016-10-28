@@ -1,8 +1,8 @@
 **Name:** MyBackup
 
-**Author:** Aren GamerZ
-
 **Version:** 2.5.2b
+
+**Author:** Aren GamerZ
 
 **Email:** arendevel@gmail.com
 
