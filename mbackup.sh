@@ -4,7 +4,7 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 2.5.2b
+# Version: 2.5.3
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration, these are just an example.
 ###########################################################################################################
@@ -29,18 +29,26 @@ green=`tput setaf 2`
 function usage(){
 	echo """Usage: mbackup <OPTION>    
        OPTION:        
-		<noargs>	-->	Goes to main menu
-		--backup	--> 	Performs a backup and exits
-		--clean		--> 	Performs a clean of older removed files and exits
-		--browse	--> 	Browses the backup device with nautilus and exits
-		--recovery	-->	Goes directly to recovery tool
-		-h --help	-->	Shows this help"""
+		<noargs>      -->  Goes to main menu
+		-b --backup   -->  Performs a backup and exits
+		-c --clean    -->  Performs a clean of older removed files and exits
+		-o --open     -->  Opens the backup device with nautilus and exits
+		-r --recovery -->  Goes directly to recovery tool
+		-i --info     -->  Shows info about the backup device
+		-h --help     -->  Shows this help"""
 
 }
 
 function quit(){
 	if df | grep -q $Device; then umount -f $Device; fi
 	exit 0
+}
+
+function infor(){
+	if ! df | grep -q $Device; then mount $Device $BkPath; fi
+	df -h | head -n 1
+	df -h | grep $Device
+	umount -f $Device
 }
 
 function backup(){
@@ -54,7 +62,7 @@ function backup(){
 	umount -f $Device
 }
 
-function browse(){
+function open(){
 	clear
 	if ! df | grep -q $Device; then mount $Device $BkPath; fi
 	nautilus $BkPath & > /dev/null
@@ -127,10 +135,11 @@ function menu(){
 		echo "${bold}${blue}			WELCOME TO MYBACKUP MENU${cyan}"
 		echo
 		echo "1) Backup your files"
-		echo "2) Browse backup device to recover files"
+		echo "2) Open backup device to recover files"
 		echo "3) Recovery Tool"                                      
 		echo "4) Clean older removed files"
-		echo "5) Exit"
+		echo "5) Show info about backup device"
+		echo "6) Exit"
 		echo
 		echo "${bold}${green}###################################################################${reset}"
 		echo
@@ -139,11 +148,12 @@ function menu(){
 		read choice
 
 		case $choice in
-			1) backup ;;
-			2) browse ;;
-			3) recovery ;;
-			4) clean ;;
-			5) quit ;;
+			1) backup; continue ;;
+			2) browse; continue ;;
+			3) recovery; continue ;;
+			4) clean; continue ;;
+			5) infor ; read -p "${bold}${green}Type enter to return to menu" pause; continue ;;
+			6) quit  ;;
 			*) echo -ne "\n${red}Menu option is not correct, returning to menu${reset}";  sleep 2; continue ;;
 		esac
 	done
@@ -154,10 +164,11 @@ else
 	if [[ $# -eq 0 ]]; then menu
 	elif [[ $# -eq 1 ]]; then
 		case $1 in
-			--backup) backup ;;
-			--browse) browse ;;
-			--recovery) recovery ;;
-			--clean) clean ;;
+			-b|--backup) backup ;;
+			-o|--open) open ;;
+			-r|--recovery) recovery ;;
+			-c|--clean) clean ;;
+			-i|--info) infor ;;
 			-h|--help) usage ;;
 			*) echo "${red}Parameter error!${reset}"; echo; usage ;;
 		esac
