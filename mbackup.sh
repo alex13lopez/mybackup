@@ -4,17 +4,16 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 2.5.3
+# Version: 3.0b
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration, these are just an example.
 ###########################################################################################################
 
-BkPath=/mnt/Backup # This is the path where the backup will be stored
-BFolder=Backup # This is the name of the mountpoint where your Backup is stored
-DPath=/mnt/Data # This is the path where the data to be backuped will be taken from
-DFolder=Data # This is the name of the mountpoint where your Data is stored
-DtoBackup=('/mnt/Data/IT/' '/mnt/Data/Music/') # Put the folders you want to backup between '' and separated by spaces
-Device=/dev/sda1 # This is the device where the backup is stored
+
+BkPath=/mnt/Backup		                         # Full path where the backup will be stored
+DPath=/mnt/Data    	                             # Full path of the location of your root data folder
+DtoBackup=('/mnt/Data/IT/' '/mnt/Data/Music/')   # Specific directorys to backup, separated by spaces
+Device=/dev/sda1                           		 # Device of the backup. Use only if you want automatic mount and umount, leave empty otherwise.
 
 #Colors
 red=`tput setaf 1`
@@ -40,41 +39,57 @@ function usage(){
 }
 
 function quit(){
-	if df | grep -q $Device; then umount -f $Device; fi
+	if [ -n $Device ]; then
+		if df | grep -q $Device; then umount -f $Device; fi
+	fi
 	exit 0
 }
 
 function infor(){
-	if ! df | grep -q $Device; then mount $Device $BkPath; fi
+	if [ -n $Device ]; then
+		if ! df | grep -q $Device; then mount $Device $BkPath; fi
+	fi
 	df -h | head -n 1
 	df -h | grep $Device
-	umount -f $Device
+	if [ -n $Device ]; then
+		umount -f $Device
+	fi
 }
 
 function backup(){
-	if ! df | grep -q $Device; then mount $Device $BkPath; fi
+	if [ -n $Device ]; then
+		if ! df | grep -q $Device; then mount $Device $BkPath; fi
+	fi
 	for dir in ${DtoBackup[@]} 
 	do
 		cp -ruv --no-preserve=all $dir $BkPath
 	done
 	find $BkPath -type d -exec chmod -R 770 {} \;
 	find $BkPath -type f -exec chmod -R 660 {} \;
-	umount -f $Device
+	if [ -n $Device ]; then
+		umount -f $Device
+	fi
 }
 
 function open(){
 	clear
-	if ! df | grep -q $Device; then mount $Device $BkPath; fi
+	if [ -n $Device ]; then
+		if ! df | grep -q $Device; then mount $Device $BkPath; fi
+	fi
 	nautilus $BkPath & > /dev/null
 	echo "${bold}${green}Type enter when you finished...${reset}"
 	read pause
 	nautilus -q
-	umount -f $Device
+	if [ -n $Device ]; then
+		umount -f $Device
+	fi
 }
 
 function recovery(){
 	clear
-	if ! df | grep -q $Device; then mount $Device $BkPath; fi
+	if [ -n $Device ]; then
+		if ! df | grep -q $Device; then mount $Device $BkPath; fi
+	fi
 	if [ ! -d $DPath/recovered ]; then mkdir $DPath/recovered; fi
 	echo "${bold}${blue}Welcome to recovery tool${reset}"
 	echo
@@ -108,22 +123,31 @@ function recovery(){
 			fi
 		fi
 	done
-	umount -f $Device
+	if [ -n $Device ]; then
+		umount -f $Device
+	fi
 }
 
 function clean(){
-	if ! df | grep -q $Device; then mount $Device $BkPath; fi
+	if [ -n $Device ]; then
+		if ! df | grep -q $Device; then mount $Device $BkPath; fi
+	fi
 	find "$BkPath" -mindepth 1 | while read bfile
 	do
-	dfile=$(echo "$bfile" | sed "s/$BFolder/$DFolder/")
+	dfile=$(echo "$bfile" | sed "s|$BkPath|$DPath|")
 	if [[ ! -e "$dfile" ]]; then
 		echo "${red}File $dfile not found, deleting from backup...${reset}"
 		rm -rf "$bfile"
 	else
 		continue
 	fi
+
+	
+
 	done
-	umount -f $Device
+	if [ -n $Device ]; then
+		umount -f $Device
+	fi
 }
 
 function menu(){
