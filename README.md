@@ -1,6 +1,6 @@
 **Name:** MyBackup
 
-**Version:** 2.5.2b
+**Version:** 3.1b
 
 **Author:** Aren GamerZ
 
@@ -8,6 +8,6 @@
 
 **Description:** It's a bash script that will make your life easier by helping you to create and mantain a backup without any complications.
 
-**Important:** You have to check the source to manually setup the program to suit your needs 
+**Important:** You have to check the source to manually setup the program to suit your needs, also make sure to read the changelog.log
 
 **Configuration is easy**: You **ONLY** have to **CHANGE THE VARS AS INDICATED**
