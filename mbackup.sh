@@ -4,7 +4,7 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 3.1.1b
+# Version: 3.1.2b
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration, these are just an example.
 # More IMPORTANT: This script is in BETA version, so report any bugs to me please
@@ -141,9 +141,9 @@ function clean(){
 	do
 	dfile=$(echo "$bfile" | sed "s|$BkPath|$DPath|")
 	if [[ ! -e "$dfile" ]]; then
-		if find -wholename "$dfile" -mtime "+$days" -exec rm -rf "{}" \; 
-		then
+		if find -wholename "$dfile" -mtime "+$days"; then
 			echo "${red}File $dfile not found and is $days days older so deleting from backup...${reset}"
+			rm -rf "$bfile"
 		fi
 	else
 		continue

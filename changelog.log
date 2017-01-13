@@ -1,7 +1,7 @@
-####CHANGELOG V3.1.1b ####
+####CHANGELOG V3.1.2b ####
 
 1. Now the funcion clear is even more optimized than in version 3.0b because now it searches only the files that are older than the number you
    indicated in the variable $days, by default this variable is set up to 30.
 2. Now every variable is envolved between "" to prevent shell interpreting a space as new line or another parameter.
 
-3. Fixed a minor programmation fail.
+3. Fixed a minor mistake.

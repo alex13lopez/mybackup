@@ -1,6 +1,6 @@
 **Name:** MyBackup
 
-**Version:** 3.1.1b
+**Version:** 3.1.2b
 
 **Author:** Aren GamerZ
 
