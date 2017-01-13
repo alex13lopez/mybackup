@@ -4,7 +4,7 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 3.1b
+# Version: 3.1.1b
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration, these are just an example.
 # More IMPORTANT: This script is in BETA version, so report any bugs to me please
@@ -137,12 +137,14 @@ function clean(){
 	if [ -n "$Device" ]; then
 		if ! df | grep -q "$Device"; then mount "$Device" "$BkPath"; fi
 	fi
-	find "$BkPath" -mindepth 1 -mtime "+$days" | while read bfile
+	find "$BkPath" -mindepth 1 | while read bfile
 	do
 	dfile=$(echo "$bfile" | sed "s|$BkPath|$DPath|")
 	if [[ ! -e "$dfile" ]]; then
-		echo "${red}File $dfile not found and is $days days older so deleting from backup...${reset}"
-		rm -rf "$bfile"
+		if find -wholename "$dfile" -mtime "+$days" -exec rm -rf "{}" \; 
+		then
+			echo "${red}File $dfile not found and is $days days older so deleting from backup...${reset}"
+		fi
 	else
 		continue
 	fi
@@ -181,7 +183,7 @@ function menu(){
 			2) browse; continue ;;
 			3) recovery; continue ;;
 			4) clean; continue ;;
-			5) infor ; read -p "${bold}${green}Type enter to return to menu" pause; continue ;;
+			5) infor ; echo ;read -p "${bold}${green}Type enter to return to menu" pause; continue ;;
 			6) quit  ;;
 			*) echo -ne "\n${red}Menu option is not correct, returning to menu${reset}";  sleep 2; continue ;;
 		esac
