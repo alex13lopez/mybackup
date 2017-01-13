@@ -1,5 +1,5 @@
-####CHANGELOG####
+####CHANGELOG V3.1b ####
 
-1.- Now the configuration variables are more clear and simple.
-2.- Info function was added, which it shows information about de device you use to store the backup such as the size, used percentage and some more things.
-3.- The clean function has been rewritted almost from scratch; now is more optimized.
+1. Now the funcion clear is even more optimized than in version 3.0b because now it searches only the files that are older than the number you
+   indicated in the variable $days, by default this variable is set up to 30.
+2. Now every variable is envolved between "" to prevent shell interpreting a space as new line or another parameter.

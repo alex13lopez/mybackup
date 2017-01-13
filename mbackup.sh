@@ -4,9 +4,13 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 3.0b
+# Version: 3.1b
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration, these are just an example.
+# More IMPORTANT: This script is in BETA version, so report any bugs to me please
+# Note: It's not mandatory to have the backup separated in another partition, but is highly recommended,
+#	    because if a ransomware ciphers your disk it will also cipher your backup, thus the
+#	    purpose of having a backup will become useless.
 ###########################################################################################################
 
 
@@ -14,6 +18,7 @@ BkPath=/mnt/Backup		                         # Full path where the backup will b
 DPath=/mnt/Data    	                             # Full path of the location of your root data folder
 DtoBackup=('/mnt/Data/IT/' '/mnt/Data/Music/')   # Specific directorys to backup, separated by spaces
 Device=/dev/sda1                           		 # Device of the backup. Use only if you want automatic mount and umount, leave empty otherwise.
+days=30											 # Days that files will be keeped in the backup if they were removed from data folder
 
 #Colors
 red=`tput setaf 1`
@@ -39,79 +44,79 @@ function usage(){
 }
 
 function quit(){
-	if [ -n $Device ]; then
-		if df | grep -q $Device; then umount -f $Device; fi
+	if [ -n "$Device" ]; then
+		if df | grep -q "$Device"; then umount -f "$Device"; fi
 	fi
 	exit 0
 }
 
 function infor(){
-	if [ -n $Device ]; then
-		if ! df | grep -q $Device; then mount $Device $BkPath; fi
+	if [ -n "$Device" ]; then
+		if ! df | grep -q "$Device"; then mount "$Device" "$BkPath"; fi
 	fi
 	df -h | head -n 1
-	df -h | grep $Device
-	if [ -n $Device ]; then
-		umount -f $Device
+	df -h | grep "$Device"
+	if [ -n "$Device" ]; then
+		umount -f "$Device"
 	fi
 }
 
 function backup(){
-	if [ -n $Device ]; then
-		if ! df | grep -q $Device; then mount $Device $BkPath; fi
+	if [ -n "$Device" ]; then
+		if ! df | grep -q "$Device"; then mount "$Device" "$BkPath"; fi
 	fi
 	for dir in ${DtoBackup[@]} 
 	do
-		cp -ruv --no-preserve=all $dir $BkPath
+		cp -ruv --no-preserve=all "$dir" "$BkPath"
 	done
-	find $BkPath -type d -exec chmod -R 770 {} \;
-	find $BkPath -type f -exec chmod -R 660 {} \;
-	if [ -n $Device ]; then
-		umount -f $Device
+	find "$BkPath" -type d -exec chmod -R 770 {} \;
+	find "$BkPath" -type f -exec chmod -R 660 {} \;
+	if [ -n "$Device" ]; then
+		umount -f "$Device"
 	fi
 }
 
 function open(){
 	clear
-	if [ -n $Device ]; then
-		if ! df | grep -q $Device; then mount $Device $BkPath; fi
+	if [ -n "$Device" ]; then
+		if ! df | grep -q "$Device"; then mount "$Device" "$BkPath"; fi
 	fi
-	nautilus $BkPath & > /dev/null
+	nautilus "$BkPath" & > /dev/null
 	echo "${bold}${green}Type enter when you finished...${reset}"
 	read pause
 	nautilus -q
-	if [ -n $Device ]; then
-		umount -f $Device
+	if [ -n "$Device" ]; then
+		umount -f "$Device"
 	fi
 }
 
 function recovery(){
 	clear
-	if [ -n $Device ]; then
-		if ! df | grep -q $Device; then mount $Device $BkPath; fi
+	if [ -n "$Device" ]; then
+		if ! df | grep -q "$Device"; then mount "$Device" "$BkPath"; fi
 	fi
-	if [ ! -d $DPath/recovered ]; then mkdir $DPath/recovered; fi
+	if [ ! -d "$DPath/recovered" ]; then mkdir "$DPath/recovered"; fi
 	echo "${bold}${blue}Welcome to recovery tool${reset}"
 	echo
 	while true
 	do
 	    echo -n "${bold}${green}Which folder/file do you want to recover: ${reset}"
 		read name
-		if [[ $name == "!quit" ]]; then
+		if [[ "$name" == "!quit" ]]; then
 			break
 		else
 			file=$(find "$BkPath" -name "$name")
 			if [ -f "$file" ]; then
 				echo "${bold}${cyan}Is $file the file/folder you want to recover?(Y/n) ${reset}"
 				read choice
-				if [ ! $choice ] || [ $choice == "Y" ] || [ $choice == "y" ]; then cp -ri $file $DPath/recovered
-				elif [ $choice == "N" ] || [ $choice == "n" ]; then continue
-				else echo "${bold}${yellow}Assuming yes...${reset}"; cp -ri $file $DPath/recovered
+				if [ ! "$choice" ] || [ "$choice" == "Y" ] || [ "$choice" == "y" ]; then cp -ri "$file" "$DPath/recovered"
+				elif [ "$choice" == "N" ] || [ "$choice" == "n" ]; then continue
+				else echo "${bold}${yellow}Assuming yes...${reset}"; cp -ri "$file" "$DPath/recovered"
 				fi
 				echo -n "${bold}${green}Continue recovering? (Y/n): ${reset}"
 				read choice
-				if [ ! $choice ] || [ $choice == "Y" ] || [ $choice == "y" ]; then continue
-				elif [ $choice == "N" ] || [ $choice == "n" ]; then break
+				if [ ! "$choice" ] || [ "$choice" == "Y" ] || [ "$choice" == "y" ]; then continue
+				elif [ "$choice" == "N" ] || [ "$choice" == "n" ]; then break
 				else echo "${bold}${yellow}Assuming yes...${reset}"; continue
 				fi
 			elif [ ! -f "$file" ]; then
@@ -123,20 +128,20 @@ function recovery(){
 			fi
 		fi
 	done
-	if [ -n $Device ]; then
-		umount -f $Device
+	if [ -n "$Device" ]; then
+		umount -f "$Device"
 	fi
 }
 
 function clean(){
-	if [ -n $Device ]; then
-		if ! df | grep -q $Device; then mount $Device $BkPath; fi
+	if [ -n "$Device" ]; then
+		if ! df | grep -q "$Device"; then mount "$Device" "$BkPath"; fi
 	fi
-	find "$BkPath" -mindepth 1 | while read bfile
+	find "$BkPath" -mindepth 1 -mtime "+$days" | while read bfile
 	do
 	dfile=$(echo "$bfile" | sed "s|$BkPath|$DPath|")
 	if [[ ! -e "$dfile" ]]; then
-		echo "${red}File $dfile not found, deleting from backup...${reset}"
+		echo "${red}File $dfile not found and is $days days older so deleting from backup...${reset}"
 		rm -rf "$bfile"
 	else
 		continue
@@ -145,8 +150,8 @@ function clean(){
 	
 
 	done
-	if [ -n $Device ]; then
-		umount -f $Device
+	if [ -n "$Device" ]; then
+		umount -f "$Device"
 	fi
 }
 
