@@ -1,7 +1,13 @@
-####CHANGELOG V3.1.2b ####
+####CHANGELOG V3.2.1b ####
 
 1. Now the funcion clear is even more optimized than in version 3.0b because now it searches only the files that are older than the number you
    indicated in the variable $days, by default this variable is set up to 30.
 2. Now every variable is envolved between "" to prevent shell interpreting a space as new line or another parameter.
 
 3. Fixed a minor mistake.
+
+4. Rewrited comments, now source code is more clear
+
+5. Added a new exception catcher on the backup() function. Now it checks if the path to backup exists
+
+6. Fixed an undetected bug until now, which was that the "find" in the clean() function was always returning true, thus, the files were always deleted. Now it doesn't happens anymore.

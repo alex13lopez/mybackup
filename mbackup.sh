@@ -4,7 +4,7 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 3.1.2b
+# Version: 3.2.1b
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration, these are just an example.
 # More IMPORTANT: This script is in BETA version, so report any bugs to me please
@@ -13,12 +13,20 @@
 #	    purpose of having a backup will become useless.
 ###########################################################################################################
 
+# Full path where the backup will be stored
+BkPath=/mnt/backup/
 
-BkPath=/mnt/Backup		                         # Full path where the backup will be stored
-DPath=/mnt/Data    	                             # Full path of the location of your root data folder
-DtoBackup=('/mnt/Data/IT/' '/mnt/Data/Music/')   # Specific directorys to backup, separated by spaces
-Device=/dev/sda1                           		 # Device of the backup. Use only if you want automatic mount and umount, leave empty otherwise.
-days=30											 # Days that files will be keeped in the backup if they were removed from data folder
+# Full path of the location of your root data folder
+DPath=/home/aren/
+
+# Specific directorys to backup, separated by spaces
+DtoBackup=('/home/aren/IT' '/home/aren/Music/')
+
+# Device of the backup. Use only if you want automatic mount and umount, leave empty otherwise.
+Device=/dev/LinuxEncryptedData/Backup
+
+# Days that files will be keeped in the backup if they were removed from data folder
+days=30
 
 #Colors
 red=`tput setaf 1`
@@ -31,8 +39,8 @@ bold=`tput bold`
 green=`tput setaf 2`
 
 function usage(){
-	echo """Usage: mbackup <OPTION>    
-       OPTION:        
+	echo """Usage: mbackup <OPTION>
+       OPTION:
 		<noargs>      -->  Goes to main menu
 		-b --backup   -->  Performs a backup and exits
 		-c --clean    -->  Performs a clean of older removed files and exits
@@ -65,9 +73,14 @@ function backup(){
 	if [ -n "$Device" ]; then
 		if ! df | grep -q "$Device"; then mount "$Device" "$BkPath"; fi
 	fi
-	for dir in ${DtoBackup[@]} 
+	for dir in ${DtoBackup[@]}
 	do
-		cp -ruv --no-preserve=all "$dir" "$BkPath"
+		if [[ ! -e $dir  ]]; then
+			echo "${yellow}Warning: Directory $dir does not exist, please make sure you typed the path correctly, skipping...${reset}"
+			continue
+		else
+			cp -ruv --no-preserve=all "$dir" "$BkPath"
+		fi
 	done
 	find "$BkPath" -type d -exec chmod -R 770 {} \;
 	find "$BkPath" -type f -exec chmod -R 660 {} \;
@@ -141,15 +154,15 @@ function clean(){
 	do
 	dfile=$(echo "$bfile" | sed "s|$BkPath|$DPath|")
 	if [[ ! -e "$dfile" ]]; then
-		if find -wholename "$dfile" -mtime "+$days"; then
-			echo "${red}File $dfile not found and is $days days older so deleting from backup...${reset}"
+		if [ $(find -wholename "$bfile" -mtime "+$days" | grep -q "$bfile") ]; then
+			echo "${red}File $dfile not found and is $days days older on the backup so deleting from backup...${reset}"
 			rm -rf "$bfile"
 		fi
 	else
 		continue
 	fi
 
-	
+
 
 	done
 	if [ -n "$Device" ]; then
@@ -167,7 +180,7 @@ function menu(){
 		echo
 		echo "1) Backup your files"
 		echo "2) Open backup device to recover files"
-		echo "3) Recovery Tool"                                      
+		echo "3) Recovery Tool"
 		echo "4) Clean older removed files"
 		echo "5) Show info about backup device"
 		echo "6) Exit"
