@@ -1,13 +1,14 @@
-####CHANGELOG V3.2.1b ####
+#### CHANGE LOG V3.3.2-rc/stable ####
 
-1. Now the funcion clear is even more optimized than in version 3.0b because now it searches only the files that are older than the number you
+1. Now the function clear is even more optimized than in version 3.0b because now it searches only the files that are older than the number you
    indicated in the variable $days, by default this variable is set up to 30.
-2. Now every variable is envolved between "" to prevent shell interpreting a space as new line or another parameter.
+2. Now every variable is between "" to prevent shell interpreting a space as new line or another parameter.
 
 3. Fixed a minor mistake.
 
-4. Rewrited comments, now source code is more clear
+4. Rewritten comments, now source code is more clear
 
 5. Added a new exception catcher on the backup() function. Now it checks if the path to backup exists
 
-6. Fixed an undetected bug until now, which was that the "find" in the clean() function was always returning true, thus, the files were always deleted. Now it doesn't happens anymore.
+6. Rewritten function clean(), find wasn't working well, now myBackup works directly on dates. Besides, now it will delete files that were removed 30 days ago since removal from data folder, not since it was
+created on backup folder (copied to backup). This was a fail of implementation, not a bug of the program, thus It wasn't detected until now.

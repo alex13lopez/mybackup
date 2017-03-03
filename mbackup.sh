@@ -4,7 +4,7 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 3.2.1b
+# Version: 3.3.2-rc/stable
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration, these are just an example.
 # More IMPORTANT: This script is in BETA version, so report any bugs to me please
@@ -14,19 +14,19 @@
 ###########################################################################################################
 
 # Full path where the backup will be stored
-BkPath=/mnt/backup/
+BkPath='/mnt/backup/'
 
 # Full path of the location of your root data folder
-DPath=/home/aren/
+DPath='/home/aren/'
 
-# Specific directorys to backup, separated by spaces
+# Specific directorys to backup, separated by spaces (and full path)
 DtoBackup=('/home/aren/IT' '/home/aren/Music/')
 
 # Device of the backup. Use only if you want automatic mount and umount, leave empty otherwise.
-Device=/dev/LinuxEncryptedData/Backup
+Device='/dev/LinuxEncryptedData/Backup'
 
 # Days that files will be keeped in the backup if they were removed from data folder
-days=30
+days='30'
 
 #Colors
 red=`tput setaf 1`
@@ -150,21 +150,32 @@ function clean(){
 	if [ -n "$Device" ]; then
 		if ! df | grep -q "$Device"; then mount "$Device" "$BkPath"; fi
 	fi
+	date_today=$(date "+%s")
 	find "$BkPath" -mindepth 1 | while read bfile
 	do
-	dfile=$(echo "$bfile" | sed "s|$BkPath|$DPath|")
-	if [[ ! -e "$dfile" ]]; then
-		if [ $(find -wholename "$bfile" -mtime "+$days" | grep -q "$bfile") ]; then
-			echo "${red}File $dfile not found and is $days days older on the backup so deleting from backup...${reset}"
-			rm -rf "$bfile"
+		dfile=$(echo "$bfile" | sed "s|$BkPath|$DPath|")
+		access_date=$(date -d $(stat -c %x "$bfile" | cut -d" " -f1) "+%s")
+		# The '86400' is to transform seconds directly to days
+		date_difference="$((($date_today-$access_date)/86400))"
+		if [[ ! -e "$dfile" ]]; then
+			if [[ "$date_difference" -ge "$days" ]]; then
+				echo "${red}File $dfile not found and is $days days older in the backup so deleting from backup...${reset}"
+				rm -rf "$bfile"
+			fi
+		else
+		# This is to update the last access time on the file in the backup if the file wasn't removed, this way, we count the $days the file was in the backup since it was deleted,
+		# not since it was created.
+		# Note that normally, filesystems are loaded with the option relatime, which only updates the access time once per day, to avoid too much I/O operations because that will
+		# cause the filesystem to be really slow
+			if [[ ! -d "$bfile" ]]; then
+				head -n1 "$bfile" 1>/dev/null 2>/dev/null
+				continue
+			else
+				continue
+			fi
 		fi
-	else
-		continue
-	fi
-
-
-
 	done
+
 	if [ -n "$Device" ]; then
 		umount -f "$Device"
 	fi
