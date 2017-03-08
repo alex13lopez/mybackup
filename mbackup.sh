@@ -16,10 +16,10 @@
 ################################################ CONF VARS ######################################################################
 # Full path where the backup will be stored
 # IMPORTANT NOTE: Don't add a trailing '/' e.g: /mnt/backup instead of /mnt/backup/
-BkPath='/mnt/backup'
+BkPath=''
 # Full path of the location of your root data folder
 # IMPORTANT NOTE: Don't add a trailing '/' e.g: /home/aren instead of /home/aren/
-DPath='/home/aren'
+DPath=''
 # Specific directorys to backup, separated by spaces (and full path)
 DtoBackup=('')
 # Device of the backup. Use only if you want automatic mount and umount, leave empty otherwise.
