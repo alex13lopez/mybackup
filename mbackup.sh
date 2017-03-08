@@ -23,7 +23,7 @@ DPath=''
 # Specific directorys to backup, separated by spaces (and full path)
 DtoBackup=('')
 # Device of the backup. Use only if you want automatic mount and umount, leave empty otherwise.
-Device='/dev/sda6'
+Device=''
 # Days that files will be keeped in the backup if they were removed from data folder. Recommended days='30'
 days=''
 # Default folder when recovered files/folders will be restored
