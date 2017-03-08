@@ -14,19 +14,19 @@
 ###########################################################################################################
 
 # Full path where the backup will be stored
-BkPath='/mnt/backup/'
+BkPath=''
 
 # Full path of the location of your root data folder
-DPath='/home/aren/'
+DPath='/'
 
 # Specific directorys to backup, separated by spaces (and full path)
-DtoBackup=('/home/aren/IT' '/home/aren/Music/')
+DtoBackup=('')
 
 # Device of the backup. Use only if you want automatic mount and umount, leave empty otherwise.
-Device='/dev/LinuxEncryptedData/Backup'
+Device=''
 
-# Days that files will be keeped in the backup if they were removed from data folder
-days='30'
+# Days that files will be keeped in the backup if they were removed from data folder. Recommended days='30'
+days=''
 
 #Colors
 red=`tput setaf 1`
