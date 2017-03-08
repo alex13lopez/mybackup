@@ -1,4 +1,4 @@
-#### CHANGE LOG V3.3.2-rc/stable ####
+#### CHANGE LOG 4.0-alpha ####
 
 1. Now the function clear is even more optimized than in version 3.0b because now it searches only the files that are older than the number you
    indicated in the variable $days, by default this variable is set up to 30.
@@ -12,3 +12,5 @@
 
 6. Rewritten function clean(), find wasn't working well, now myBackup works directly on dates. Besides, now it will delete files that were removed 30 days ago since removal from data folder, not since it was
 created on backup folder (copied to backup). This was a fail of implementation, not a bug of the program, thus It wasn't detected until now.
+
+7. Rewritten function recovery(), now it's useful. Because now you don't need to remember the name of the file you want to recover as before, now you can navigate through the backup with the CLI implemented.
