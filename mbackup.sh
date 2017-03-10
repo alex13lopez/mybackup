@@ -4,26 +4,27 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 4.0-alpha
+# Version: 4.0.4-alpha
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
-# Important: Set the vars below to suit your configuration, these are just an example.
+# Important: Set the vars below to suit your configuration.
 # More IMPORTANT: This script is in BETA version, so report any bugs to me please
-# Note: It's not mandatory to have the backup separated in another partition, but is highly recommended,
+# Note: It's not mandatory to have the backup separated in another partition, but It is highly recommended,
 #	    because if a ransomware ciphers your disk it will also cipher your backup, thus the
 #	    purpose of having a backup will become useless.
 ###########################################################################################################
 
 ################################################ CONF VARS ######################################################################
 # Full path where the backup will be stored
-# IMPORTANT NOTE: Don't add a trailing '/' e.g: /mnt/backup instead of /mnt/backup/
+# IMPORTANT NOTE: Do not add a trailing '/' e.g: /mnt/backup instead of /mnt/backup/
 BkPath=''
 # Full path of the location of your root data folder
-# IMPORTANT NOTE: Don't add a trailing '/' e.g: /home/aren instead of /home/aren/
+# IMPORTANT NOTE: Do not add a trailing '/' e.g: /home/aren instead of /home/aren/
 DPath=''
 # Specific directorys to backup, separated by spaces (and full path)
 DtoBackup=('')
 # Device of the backup. Use only if you want automatic mount and umount, leave empty otherwise.
 Device=''
+Automount='yes' #Default value: yes. Choose between 'yes' or 'no'.
 # Days that files will be keeped in the backup if they were removed from data folder. Recommended days='30'
 days=''
 # Default folder when recovered files/folders will be restored
@@ -110,53 +111,62 @@ function open(){
 
 function recovery(){
 	clear
+	SV_PS3="$PS3"
+	IFS=$(echo -en "\n\b")
 	if [ -n "$Device" ]; then
 		if ! df | grep -q "$Device"; then mount "$Device" "$BkPath"; fi
 	fi
 	path="$BkPath"
 	exit="false"
-	echo "Type '0' when you see the file/folder you want to enter recovery mode"; echo
+	echo; echo "Type 'r' when you see the file/folder you want to enter recovery mode"; echo "Type '..' to return to the previous folder"; echo "Type 'q' to quit"
 	while [ "$exit" = "false" ]; do
+		PS3='Navigation Mode #$> '
 		cd "$path"
+		echo
 		select npath in $(ls -1); do
-			if [ -z $npath ]; then
-				echo "Which file/folder do you want to recover?"
+			if [ "$REPLY" = "r"  -o "$REPLY" = "R" ]; then
+				PS3='Recovery Mode #$> '
+				echo; echo "Type 'n' if you want to return to navigation mode"; echo
 				select recover in $(ls -1); do
-					echo "Type '0' if you want to return to navigation mode"
-					if [ -z $recover ]; then
+					if [ "$REPLY" = "n" -o "$REPLY" = "N" ]; then
+						break
+					elif [ -z $recover ]; then
+						echo; echo "That wasn't a valid choice"
 						break
 					else
-						read -p "In which folder do you want to save the recovered files/folders?[default:'$default_rescue']: " rescue_path; echo
+						echo; read -p "In which folder do you want to save the recovered files/folders?[default:'$default_rescue']: " rescue_path
 						if [ -z $rescue_path ]; then
 							rescue_path="$default_rescue"
 						fi
-						if [ -e $rescue_path ]; then
-							echo "Error: $rescue_path already exists and is not a folder, it's a file, try again"; echo
+						if [ -d $rescue_path ]; then
+							cp -Rv "$path/$npath/$recover" "$rescue_path"
+							find "$rescue_path" -type f -exec chmod 666 "{}" \;
+							find "$rescue_path" -type d -exec chmod 777 "{}" \;
 						elif ! [ -d $rescue_path ]; then
 							mkdir "$rescue_path"
 							cp -Rv "$path/$npath/$recover" "$rescue_path"
+							find "$rescue_path" -type f -exec chmod 666 "{}" \;
+							find "$rescue_path" -type d -exec chmod 777 "{}" \;
 						else
-							cp -Rv "$path/$npath/$recover" "$rescue_path"
+							echo; echo "Error: $rescue_path already exists and is not a folder"
+							break
 						fi
 					fi
 				done
-				read -p "Did you finished recovering files?[Y/N]: " choice
-				if [ $choice = "Y" -o $choice = "y" ]; then
-					exit="true"
-					break
-				elif [ $choice = "N" -o $choice = "n" ]; then
-					break
-				else
-					echo "That wasn't a 'y' nor a 'n', so I'll asume you want to get out, bye."
-					exit="true"
-					break
-				fi
+			elif [ "$REPLY" = ".." ]; then
+				path="$path/.."
+				break
+			elif [ "$REPLY" = "q" -o "$REPLY" = "Q" ]; then
+				exit="true"
+				break
 			else
 				path="$path/$npath"
 				break
 			fi
+			break
 		done
 	done
+	cd
 	if [ -n "$Device" ]; then
 		umount -f "$Device"
 	fi
