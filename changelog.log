@@ -1,4 +1,4 @@
-#### CHANGE LOG 4.0.4-alpha ####
+#### CHANGE LOG 4.1.0-beta ####
 
 1. Now the function clear is even more optimized than in version 3.0b because now it searches only the files that are older than the number you
    indicated in the variable $days, by default this variable is set up to 30.
@@ -14,3 +14,7 @@
 created on backup folder (copied to backup). This was a fail of implementation, not a bug of the program, thus It wasn't detected until now.
 
 7. Rewritten function recovery(), now it's useful. Because now you don't need to remember the name of the file you want to recover as before, now you can navigate through the backup with the CLI implemented.
+
+8. Fixed minor type mistakes that Ivan_Blasco reported, thanks :)
+
+9. Written a new function called device_check() that will avoid the wrong behavior the script had previously when the device of the backup wasn't mounted
