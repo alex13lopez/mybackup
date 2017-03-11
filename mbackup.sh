@@ -4,7 +4,7 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 4.0.4-alpha
+# Version: 4.0.5-alpha
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration.
 # More IMPORTANT: This script is in BETA version, so report any bugs to me please
@@ -16,22 +16,22 @@
 ################################################ CONF VARS ######################################################################
 # Full path where the backup will be stored
 # IMPORTANT NOTE: Do not add a trailing '/' e.g: /mnt/backup instead of /mnt/backup/
-BkPath=''
+BkPath='/mnt/backup'
 # Full path of the location of your root data folder
 # IMPORTANT NOTE: Do not add a trailing '/' e.g: /home/aren instead of /home/aren/
-DPath=''
+DPath='/home/aren'
 # Specific directorys to backup, separated by spaces (and full path)
-DtoBackup=('')
+DtoBackup=('/home/aren/IT' '/home/aren/MUsic')
 # Device of the backup. Use only if you want automatic mount and umount, leave empty otherwise.
-Device=''
+Device='/dev/sda6'
 Automount='yes' #Default value: yes. Choose between 'yes' or 'no'.
 # Days that files will be keeped in the backup if they were removed from data folder. Recommended days='30'
-days=''
+days='30'
 # Default folder when recovered files/folders will be restored
 default_rescue="$DPath/rescued"
 # Should hidden files and folders be shown in recovery CLI?
 # Default option is 'hide'. You can choose either 'hide' or 'show'.
-hidden_files='hide'
+hidden_files='show'
 #################################################################################################################################
 
 #Colors
@@ -43,6 +43,12 @@ blue=`tput setaf 4`
 cyan=`tput setaf 6`
 bold=`tput bold`
 green=`tput setaf 2`
+
+# This is to make sure 'clear' is not a custom alias such as 'printf "\033c"'. The reason is because causes the mbackup CLI to have delays.
+alias clear="\clear"
+# Same as clear but with ls.
+alias ls="\ls"
+
 
 function usage(){
 	echo """Usage: mbackup <OPTION>
@@ -109,29 +115,73 @@ function open(){
 	fi
 }
 
+function available_commands() {
+	clear
+	echo """Available Commands
+			 OPTION:
+			 ..			--> Goes to parent folder (in navigation mode)
+			 r			--> Enters recovery mode (in navigation mode)
+			 n			--> Enters navigation (in recovery mode)
+			 q			--> Quits program
+			 hide		--> Hides hidden files
+			 show		--> Shows hidden files
+			 h      --> Shows this help"""
+	echo; read -p "${green}Press enter to continue...${reset}"
+	clear
+}
+
+function list_format() {
+	hidden_files="$1"
+	if [ "$hidden_files" = 'hide' ]; then
+		unset $extra_args
+	elif  [ "$hidden_files" = 'show' ]; then
+		extra_args='-A'
+	else
+		echo; echo "${yellow}${bold}Warning: That wasn't a valid parameter, assuming hidden_files='hide'${reset}"
+		unset $extra_args
+	fi
+}
+
 function recovery(){
 	clear
 	SV_PS3="$PS3"
+	extra_args=''
 	IFS=$(echo -en "\n\b")
 	if [ -n "$Device" ]; then
 		if ! df | grep -q "$Device"; then mount "$Device" "$BkPath"; fi
 	fi
 	path="$BkPath"
 	exit="false"
-	echo; echo "Type 'r' when you see the file/folder you want to enter recovery mode"; echo "Type '..' to return to the previous folder"; echo "Type 'q' to quit"
 	while [ "$exit" = "false" ]; do
+		clear
+		list_format "$hidden_files"
+		echo; echo "${green}Type 'h' to see available commands${reset}"
 		PS3='Navigation Mode #$> '
 		cd "$path"
 		echo
-		select npath in $(ls -1); do
+		select npath in $(ls $extra_args -1); do
 			if [ "$REPLY" = "r"  -o "$REPLY" = "R" ]; then
+				clear
 				PS3='Recovery Mode #$> '
-				echo; echo "Type 'n' if you want to return to navigation mode"; echo
-				select recover in $(ls -1); do
+				echo; echo "${green}Type 'h' to see available commands${reset}"; echo
+				select recover in $(ls $extra_args -1); do
 					if [ "$REPLY" = "n" -o "$REPLY" = "N" ]; then
 						break
+					elif [ "$REPLY" = "h" -o "$REPLY" = "H" ]; then
+						available_commands
+						echo; echo "${green}Type 'h' to see available commands${reset}"; echo
+						unset $REPLY
+					elif [ "$REPLY" = "q" -o "$REPLY" = "Q" ]; then
+						exit="true"
+						break
+					# elif [ "$REPLY" = "hide" -o "HIDE" ]; then
+					# 	hidden_files="hide"
+					# 	break
+					# elif [ "$REPLY" = "show" -o "SHOW" ]; then
+					# 	hidden_files="show"
+					# 	break
 					elif [ -z $recover ]; then
-						echo; echo "That wasn't a valid choice"
+						echo; echo "${red}${bold}That wasn't a valid choice${reset}"
 						break
 					else
 						echo; read -p "In which folder do you want to save the recovered files/folders?[default:'$default_rescue']: " rescue_path
@@ -148,7 +198,7 @@ function recovery(){
 							find "$rescue_path" -type f -exec chmod 666 "{}" \;
 							find "$rescue_path" -type d -exec chmod 777 "{}" \;
 						else
-							echo; echo "Error: $rescue_path already exists and is not a folder"
+							echo; echo "${red}${bold}Error: $rescue_path already exists and is not a folder${reset}"
 							break
 						fi
 					fi
@@ -159,6 +209,15 @@ function recovery(){
 			elif [ "$REPLY" = "q" -o "$REPLY" = "Q" ]; then
 				exit="true"
 				break
+			elif [ "$REPLY" = "h" -o "$REPLY" = "H" ]; then
+				available_commands
+				unset $REPLY
+			# elif [ "$REPLY" = "hide" -o "HIDE" ]; then
+			# 	hidden_files="hide"
+			# 	break
+			# elif [ "$REPLY" = "show" -o "SHOW" ]; then
+			# 	hidden_files="show"
+			# 	break
 			else
 				path="$path/$npath"
 				break
