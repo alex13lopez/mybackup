@@ -4,7 +4,7 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 4.0.6-alpha
+# Version: 4.1.0-alpha
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration.
 # More IMPORTANT: This script is in BETA version, so report any bugs to me please
@@ -28,9 +28,9 @@ DtoBackup=('/home/aren/IT' '/home/aren/MUsic')
 
 # Put in the var $Device the device you use to store the backup in case you use another partition of the disk or another device,
 # this way, the script will check if it's mounted or not
-# The $Automount option is highly recommended to be set to 'yes', but you can set it to 'no' if you want.
+# The $automount option is highly recommended to be set to 'yes', but you can set it to 'no' if you want.
 Device='/dev/sda6'
-Automount='yes' #Default value: yes. Choose between 'yes' or 'no'.
+automount='pene' #Default value: 'yes'. Choose between 'yes' or 'no'.
 
 # Days that files will be keeped in the backup if they were removed from data folder. Recommended days='30'
 days='30'
@@ -42,6 +42,9 @@ default_rescue="$DPath/rescued"
 # This is to set the default behavior, you can change this later on interactively
 # Default option is 'hide'. You can choose either 'hide' or 'show'.
 hidden_files='hide'
+
+# This makes device_check() verbose. Default value: false. You can set it to "true" or "false".
+verbose="true"
 #################################################################################################################################
 
 #Colors
@@ -80,15 +83,45 @@ function quit(){
 	exit 0
 }
 
+function device_check() {
+	if [ -n "$Device" ]; then
+		if ! df | grep -q "$Device"; then
+			if [ "$automount" = "no" ]; then
+				echo; echo "${red}Error: $Device is not mounted and automount option is disabled${reset}"; echo
+				return 1
+			elif [ "$automount" = "yes" ]; then
+				if [ "$verbose" = "true" ]; then
+					echo; echo "${green}Device $Device is not mounted but automount is enabled so $Device will be mounted${reset}"; echo
+				fi
+				mount "$Device" "$BkPath"
+				return 0
+			else
+				read -t 20 -p "${yellow}Warning: automount does not have a valid value, do you want to mount the device now and set the automount var to 'yes'?[Y/n]: ${reset}" choice
+				case $choice in
+					yes|Yes|Y|y) mount "$Device" "$BkPath";  sed -i "/automount.*#Default.*Choose/s/auto.*#/automount='yes' #" $0 ;;
+					no|No|N|n) echo "${red} Then I am not able to continue, exiting program...${reset}"; exit 1 ;;
+					*) echo "${yellow}Warning: Question was not answered or was not answered correctly, assuming unattended script. Mounting $Device..."; mount "$Device" "$BkPath" ;;
+				esac
+				return 1
+			fi
+		else
+			# Device is already mounted
+			if [ "$verbose" = "true" ]; then
+				echo; echo "${green}Device $Device is already mounted${reset}"; echo
+			fi
+			return 0
+		fi
+	else
+		# $Device var is not set up so assuming the backup is not in another partition/device
+		if [ "$verbose" = "true" ]; then
+			echo; echo "${green}There is no device to mount, resuming${reset}"; echo
+		fi
+		return 0
+	fi
+}
+
 function infor(){
-	if [ -n "$Device" ]; then
-		if ! df | grep -q "$Device"; then mount "$Device" "$BkPath"; fi
-	fi
-	df -h | head -n 1
-	df -h | grep "$Device"
-	if [ -n "$Device" ]; then
-		umount -f "$Device"
-	fi
+	if device_check; then	df -h "$Device"; umount -f "$Device"; fi
 }
 
 function backup(){
