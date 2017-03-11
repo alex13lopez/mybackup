@@ -4,7 +4,7 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 4.0.5-alpha
+# Version: 4.0.6-alpha
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration.
 # More IMPORTANT: This script is in BETA version, so report any bugs to me please
@@ -14,24 +14,34 @@
 ###########################################################################################################
 
 ################################################ CONF VARS ######################################################################
+
 # Full path where the backup will be stored
 # IMPORTANT NOTE: Do not add a trailing '/' e.g: /mnt/backup instead of /mnt/backup/
 BkPath='/mnt/backup'
+
 # Full path of the location of your root data folder
 # IMPORTANT NOTE: Do not add a trailing '/' e.g: /home/aren instead of /home/aren/
 DPath='/home/aren'
+
 # Specific directorys to backup, separated by spaces (and full path)
 DtoBackup=('/home/aren/IT' '/home/aren/MUsic')
-# Device of the backup. Use only if you want automatic mount and umount, leave empty otherwise.
+
+# Put in the var $Device the device you use to store the backup in case you use another partition of the disk or another device,
+# this way, the script will check if it's mounted or not
+# The $Automount option is highly recommended to be set to 'yes', but you can set it to 'no' if you want.
 Device='/dev/sda6'
 Automount='yes' #Default value: yes. Choose between 'yes' or 'no'.
+
 # Days that files will be keeped in the backup if they were removed from data folder. Recommended days='30'
 days='30'
+
 # Default folder when recovered files/folders will be restored
 default_rescue="$DPath/rescued"
+
 # Should hidden files and folders be shown in recovery CLI?
+# This is to set the default behavior, you can change this later on interactively
 # Default option is 'hide'. You can choose either 'hide' or 'show'.
-hidden_files='show'
+hidden_files='hide'
 #################################################################################################################################
 
 #Colors
@@ -57,7 +67,7 @@ function usage(){
 		-b --backup   -->  Performs a backup and exits
 		-c --clean    -->  Performs a clean of older removed files and exits
 		-o --open     -->  Opens the backup device with nautilus and exits
-		-r --recovery -->  Goes directly to recovery tool
+		-r --recovery -->  Goes directly to recovery CLI
 		-i --info     -->  Shows info about the backup device
 		-h --help     -->  Shows this help"""
 
@@ -131,9 +141,8 @@ function available_commands() {
 }
 
 function list_format() {
-	hidden_files="$1"
 	if [ "$hidden_files" = 'hide' ]; then
-		unset $extra_args
+		extra_args=''
 	elif  [ "$hidden_files" = 'show' ]; then
 		extra_args='-A'
 	else
@@ -174,12 +183,12 @@ function recovery(){
 					elif [ "$REPLY" = "q" -o "$REPLY" = "Q" ]; then
 						exit="true"
 						break
-					# elif [ "$REPLY" = "hide" -o "HIDE" ]; then
-					# 	hidden_files="hide"
-					# 	break
-					# elif [ "$REPLY" = "show" -o "SHOW" ]; then
-					# 	hidden_files="show"
-					# 	break
+					elif [ "$REPLY" = "hide" -o "$REPLY" = "HIDE" ]; then
+						hidden_files="hide"
+						break
+					elif [ "$REPLY" = "show" -o "$REPLY" = "SHOW" ]; then
+						hidden_files="show"
+						break
 					elif [ -z $recover ]; then
 						echo; echo "${red}${bold}That wasn't a valid choice${reset}"
 						break
@@ -212,15 +221,20 @@ function recovery(){
 			elif [ "$REPLY" = "h" -o "$REPLY" = "H" ]; then
 				available_commands
 				unset $REPLY
-			# elif [ "$REPLY" = "hide" -o "HIDE" ]; then
-			# 	hidden_files="hide"
-			# 	break
-			# elif [ "$REPLY" = "show" -o "SHOW" ]; then
-			# 	hidden_files="show"
-			# 	break
-			else
-				path="$path/$npath"
+			elif [ "$REPLY" = "hide" -o "$REPLY" = "HIDE" ]; then
+				hidden_files="hide"
 				break
+			elif [ "$REPLY" = "show" -o "$REPLY" = "SHOW" ]; then
+				hidden_files="show"
+				break
+			else
+				if [ ! -d $npath ]; then
+					echo; echo "${red}Error: that is not a directory, please, choose directorys only"
+					break
+				else
+					path="$path/$npath"
+					break
+				fi
 			fi
 			break
 		done
@@ -299,7 +313,7 @@ function menu(){
 	done
 }
 
-if [[ $EUID -ne 0 ]]; then echo "${red}GTFO! You need root privileges!${reset}"
+if [[ $EUID -ne 0 ]]; then echo "${red}You need root privileges to run this script!${reset}"
 else
 	if [[ $# -eq 0 ]]; then menu
 	elif [[ $# -eq 1 ]]; then
