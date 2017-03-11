@@ -4,7 +4,7 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 4.1.0-alpha
+# Version: 4.1.0-beta
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration.
 # More IMPORTANT: This script is in BETA version, so report any bugs to me please
@@ -13,29 +13,28 @@
 #	    purpose of having a backup will become useless.
 ###########################################################################################################
 
-################################################ CONF VARS ######################################################################
+################################################################################ CONF VARS ########################################################################################################
 
 # Full path where the backup will be stored
 # IMPORTANT NOTE: Do not add a trailing '/' e.g: /mnt/backup instead of /mnt/backup/
-BkPath='/mnt/backup'
+BkPath=''
 
 # Full path of the location of your root data folder
 # IMPORTANT NOTE: Do not add a trailing '/' e.g: /home/aren instead of /home/aren/
-DPath='/home/aren'
+DPath=''
 
-# Specific directorys to backup, separated by spaces (and full path)
-DtoBackup=('/home/aren/IT' '/home/aren/MUsic')
+# Specific directories to backup, separated by spaces (and full path)
+DtoBackup=('')
 
-# Put in the var $Device the device you use to store the backup in case you use another partition of the disk or another device,
-# this way, the script will check if it's mounted or not
+# Put in the var $Device the device you use to store the backup in case you use another partition of the disk or another device, this way, the script will be able to check if it's mounted or not
 # The $automount option is highly recommended to be set to 'yes', but you can set it to 'no' if you want.
-Device='/dev/sda6'
-automount='pene' #Default value: 'yes'. Choose between 'yes' or 'no'.
+Device=''
+automount='yes' #Default value: 'yes'. Choose between 'yes' or 'no'.
 
-# Days that files will be keeped in the backup if they were removed from data folder. Recommended days='30'
+# Days that files will be kept in the backup if they were removed from data folder. Default days='30'
 days='30'
 
-# Default folder when recovered files/folders will be restored
+# Default folder when recovered files/folders will be restored. Default value: default_rescue="$DPath/rescued"
 default_rescue="$DPath/rescued"
 
 # Should hidden files and folders be shown in recovery CLI?
@@ -44,8 +43,8 @@ default_rescue="$DPath/rescued"
 hidden_files='hide'
 
 # This makes device_check() verbose. Default value: false. You can set it to "true" or "false".
-verbose="true"
-#################################################################################################################################
+verbose="false"
+###################################################################################################################################################################################################
 
 #Colors
 red=`tput setaf 1`
@@ -98,11 +97,11 @@ function device_check() {
 			else
 				read -t 20 -p "${yellow}Warning: automount does not have a valid value, do you want to mount the device now and set the automount var to 'yes'?[Y/n]: ${reset}" choice
 				case $choice in
-					yes|Yes|Y|y) mount "$Device" "$BkPath";  sed -i "/automount.*#Default.*Choose/s/auto.*#/automount='yes' #" $0 ;;
-					no|No|N|n) echo "${red} Then I am not able to continue, exiting program...${reset}"; exit 1 ;;
-					*) echo "${yellow}Warning: Question was not answered or was not answered correctly, assuming unattended script. Mounting $Device..."; mount "$Device" "$BkPath" ;;
+					yes|Yes|Y|y) mount "$Device" "$BkPath";  sed -i "/automount='yes' #/" $0 ;;
+					no|No|N|n) echo "${red}Then I am not able to continue, exiting program...${reset}"; exit 1 ;;
+					*) echo -e "${yellow}\nWarning: Question was not answered or was not answered correctly, assuming unattended script. Mounting $Device...${reset}"; mount "$Device" "$BkPath" ;;
 				esac
-				return 1
+				return 0
 			fi
 		else
 			# Device is already mounted
@@ -126,7 +125,7 @@ function infor(){
 
 function backup(){
 	if [ -n "$Device" ]; then
-		if ! df | grep -q "$Device"; then mount "$Device" "$BkPath"; fi
+		if ! device_check; then	exit 1; fi
 	fi
 	for dir in ${DtoBackup[@]}
 	do
@@ -145,10 +144,10 @@ function backup(){
 }
 
 function open(){
-	clear
 	if [ -n "$Device" ]; then
-		if ! df | grep -q "$Device"; then mount "$Device" "$BkPath"; fi
+		if ! device_check; then exit 1; fi
 	fi
+	clear
 	nautilus "$BkPath" & > /dev/null
 	echo "${bold}${green}Type enter when you finished...${reset}"
 	read pause
@@ -185,13 +184,13 @@ function list_format() {
 }
 
 function recovery(){
+	if [ -n "$Device" ]; then
+		if ! device_check; then exit 1; fi
+	fi
 	clear
 	SV_PS3="$PS3"
 	extra_args=''
 	IFS=$(echo -en "\n\b")
-	if [ -n "$Device" ]; then
-		if ! df | grep -q "$Device"; then mount "$Device" "$BkPath"; fi
-	fi
 	path="$BkPath"
 	exit="false"
 	while [ "$exit" = "false" ]; do
@@ -262,7 +261,7 @@ function recovery(){
 				break
 			else
 				if [ ! -d $npath ]; then
-					echo; echo "${red}Error: that is not a directory, please, choose directorys only"
+					echo; echo "${red}Error: that is not a directory, please, choose directories only"
 					break
 				else
 					path="$path/$npath"
@@ -280,7 +279,7 @@ function recovery(){
 
 function clean(){
 	if [ -n "$Device" ]; then
-		if ! df | grep -q "$Device"; then mount "$Device" "$BkPath"; fi
+		if ! device_check; then exit 1; fi
 	fi
 	date_today=$(date "+%s")
 	find "$BkPath" -mindepth 1 | while read bfile
@@ -307,7 +306,6 @@ function clean(){
 			fi
 		fi
 	done
-
 	if [ -n "$Device" ]; then
 		umount -f "$Device"
 	fi
