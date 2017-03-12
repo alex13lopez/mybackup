@@ -1,17 +1,19 @@
 #!/bin/bash
 
-###########################################################################################################
+################################################################################################################################################
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 4.1.0-beta
+# Version: 4.1.1-beta
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration.
-# More IMPORTANT: This script is in BETA version, so report any bugs to me please
+# More IMPORTANT: This script is in BETA version, so report any bugs to me please.
+#                 Also don't add any nor remove any line, because in the device_check() I tell sed to only act in line 34, because otherwise,
+#                 it will edit itself cause the pattern will match to itself.
 # Note: It's not mandatory to have the backup separated in another partition, but It is highly recommended,
 #	    because if a ransomware ciphers your disk it will also cipher your backup, thus the
 #	    purpose of having a backup will become useless.
-###########################################################################################################
+################################################################################################################################################
 
 ################################################################################ CONF VARS ########################################################################################################
 
@@ -95,10 +97,10 @@ function device_check() {
 				mount "$Device" "$BkPath"
 				return 0
 			else
-				read -t 20 -p "${yellow}Warning: automount does not have a valid value, do you want to mount the device now and set the automount var to 'yes'?[Y/n]: ${reset}" choice
+				read -t 20 -p "${yellow}Warning: '$automount' is not a valid value for automount, do you want to mount the device now and set the automount var to 'yes'?[y/n]: ${reset}" choice
 				case $choice in
-					yes|Yes|Y|y) mount "$Device" "$BkPath";  sed -i "/automount='yes' #/" $0 ;;
-					no|No|N|n) echo "${red}Then I am not able to continue, exiting program...${reset}"; exit 1 ;;
+					yes|Yes|Y|y) mount "$Device" "$BkPath";  sed -in "34s/auto.*#/automount='yes' #/" $0 ;;
+					no|No|N|n) echo "${red}Then I am not able to continue, exiting program...${reset}"; return 1 ;;
 					*) echo -e "${yellow}\nWarning: Question was not answered or was not answered correctly, assuming unattended script. Mounting $Device...${reset}"; mount "$Device" "$BkPath" ;;
 				esac
 				return 0
