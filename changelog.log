@@ -18,3 +18,9 @@ created on backup folder (copied to backup). This was a fail of implementation, 
 8. Fixed minor type mistakes that Ivan_Blasco reported, thanks :)
 
 9. Written a new function called device_check() that will avoid the wrong behavior the script had previously when the device of the backup wasn't mounted
+
+10. Minor improvements:
+        - Separated configuration from script so every time you update, you won't loose configuration.
+        - Added '-e' option to read in recovery, so you can tabulate to autocomplete paths
+        - Improved sed expression in device_check()
+        - Added installer.sh, that does the job of installing and configuring for you :)

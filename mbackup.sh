@@ -4,49 +4,26 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 4.1.1-beta
+# Version: 4.2.0-beta
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration.
 # More IMPORTANT: This script is in BETA version, so report any bugs to me please.
-#                 Also don't add any nor remove any line, because in the device_check() I tell sed to only act in line 34, because otherwise,
-#                 it will edit itself cause the pattern will match to itself.
 # Note: It's not mandatory to have the backup separated in another partition, but It is highly recommended,
 #	    because if a ransomware ciphers your disk it will also cipher your backup, thus the
 #	    purpose of having a backup will become useless.
 ################################################################################################################################################
 
-################################################################################ CONF VARS ########################################################################################################
+################################################### Configuration ##########################################################################
+# Configuration file. Default option = mbackup.conf
+conf_file='mbackup.conf'
+# This is to make sure 'clear' is not a custom alias such as 'printf "\033c"'. The reason is because causes the mbackup CLI to have delays.
+alias clear="\clear"
+# Same as clear but with ls.
+alias ls="\ls"
+############################################################################################################################################
 
-# Full path where the backup will be stored
-# IMPORTANT NOTE: Do not add a trailing '/' e.g: /mnt/backup instead of /mnt/backup/
-BkPath=''
-
-# Full path of the location of your root data folder
-# IMPORTANT NOTE: Do not add a trailing '/' e.g: /home/aren instead of /home/aren/
-DPath=''
-
-# Specific directories to backup, separated by spaces (and full path)
-DtoBackup=('')
-
-# Put in the var $Device the device you use to store the backup in case you use another partition of the disk or another device, this way, the script will be able to check if it's mounted or not
-# The $automount option is highly recommended to be set to 'yes', but you can set it to 'no' if you want.
-Device=''
-automount='yes' #Default value: 'yes'. Choose between 'yes' or 'no'.
-
-# Days that files will be kept in the backup if they were removed from data folder. Default days='30'
-days='30'
-
-# Default folder when recovered files/folders will be restored. Default value: default_rescue="$DPath/rescued"
-default_rescue="$DPath/rescued"
-
-# Should hidden files and folders be shown in recovery CLI?
-# This is to set the default behavior, you can change this later on interactively
-# Default option is 'hide'. You can choose either 'hide' or 'show'.
-hidden_files='hide'
-
-# This makes device_check() verbose. Default value: false. You can set it to "true" or "false".
-verbose="false"
-###################################################################################################################################################################################################
+# Loading configuration
+source $conf_file
 
 #Colors
 red=`tput setaf 1`
@@ -58,10 +35,6 @@ cyan=`tput setaf 6`
 bold=`tput bold`
 green=`tput setaf 2`
 
-# This is to make sure 'clear' is not a custom alias such as 'printf "\033c"'. The reason is because causes the mbackup CLI to have delays.
-alias clear="\clear"
-# Same as clear but with ls.
-alias ls="\ls"
 
 
 function usage(){
@@ -99,7 +72,7 @@ function device_check() {
 			else
 				read -t 20 -p "${yellow}Warning: '$automount' is not a valid value for automount, do you want to mount the device now and set the automount var to 'yes'?[y/n]: ${reset}" choice
 				case $choice in
-					yes|Yes|Y|y) mount "$Device" "$BkPath";  sed -in "34s/auto.*#/automount='yes' #/" $0 ;;
+					yes|Yes|Y|y) mount "$Device" "$BkPath";  sed -i "/.*Default value: 'yes'.*/s/auto.*#/automount='yes' #/" $conf_file ;;
 					no|No|N|n) echo "${red}Then I am not able to continue, exiting program...${reset}"; return 1 ;;
 					*) echo -e "${yellow}\nWarning: Question was not answered or was not answered correctly, assuming unattended script. Mounting $Device...${reset}"; mount "$Device" "$BkPath" ;;
 				esac
@@ -227,7 +200,8 @@ function recovery(){
 						echo; echo "${red}${bold}That wasn't a valid choice${reset}"
 						break
 					else
-						echo; read -p "In which folder do you want to save the recovered files/folders?[default:'$default_rescue']: " rescue_path
+						# Thanks to the '-e' you can tabulate to autocomplete the paths
+						echo; read -ep "In which folder do you want to save the recovered files/folders?[default:'$default_rescue']: " rescue_path
 						if [ -z $rescue_path ]; then
 							rescue_path="$default_rescue"
 						fi
