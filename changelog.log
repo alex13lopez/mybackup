@@ -1,4 +1,4 @@
-#### CHANGE LOG 4.1.1-beta ####
+#### CHANGE LOG 4.2.1-beta ####
 
 1. Now the function clear is even more optimized than in version 3.0b because now it searches only the files that are older than the number you
    indicated in the variable $days, by default this variable is set up to 30.

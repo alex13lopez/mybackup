@@ -4,7 +4,7 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 4.2.0-beta
+# Version: 4.2.1-beta
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration.
 # More IMPORTANT: This script is in BETA version, so report any bugs to me please.
@@ -15,15 +15,15 @@
 
 ################################################### Configuration ##########################################################################
 # Configuration file. Default option = mbackup.conf
-conf_file='mbackup.conf'
+conf_file=''
 # This is to make sure 'clear' is not a custom alias such as 'printf "\033c"'. The reason is because causes the mbackup CLI to have delays.
 alias clear="\clear"
 # Same as clear but with ls.
 alias ls="\ls"
-############################################################################################################################################
-
 # Loading configuration
 source $conf_file
+############################################################################################################################################
+
 
 #Colors
 red=`tput setaf 1`
@@ -136,9 +136,9 @@ function available_commands() {
 	clear
 	echo """Available Commands
 			 OPTION:
-			 ..			--> Goes to parent folder (in navigation mode)
-			 r			--> Enters recovery mode (in navigation mode)
-			 n			--> Enters navigation (in recovery mode)
+			 ..			--> Goes to parent folder
+			 r			--> Enters recovery mode
+			 n			--> Enters navigation mode
 			 q			--> Quits program
 			 hide		--> Hides hidden files
 			 show		--> Shows hidden files

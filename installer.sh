@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Conf ########################
-install_dir='/opt/myBackup/'
+install_dir='/opt/myBackup' # Don't add a trailing '/'
 ###############################
 
 if ! [ $EUID -eq 0 ]; then
@@ -48,3 +48,4 @@ if [ -n "$days" ]; then sed -i "/days/s|=.*|='$days'|" $install_dir/mbackup.conf
 if [ -n "$default_rescue" ]; then sed -i "/default_rescue/s|=.*|='$default_rescue'|" $install_dir/mbackup.conf; fi
 if [ -n "$hidden_files" ]; then sed -i "/hidden_files/s|=.*|='$hidden_files'|" $install_dir/mbackup.conf; fi
 if [ -n "$verbose" ]; then sed -i "/verbose/s|=.*|='$verbose'|" $install_dir/mbackup.conf; fi
+sed -i "/conf_file/s|=.*|='$install_dir/mbackup.conf'|" $install_dir/mbackup.sh
