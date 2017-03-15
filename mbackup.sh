@@ -4,7 +4,7 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 4.2.1-beta
+# Version: 4.2.2-beta
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration.
 # More IMPORTANT: This script is in BETA version, so report any bugs to me please.
@@ -14,7 +14,7 @@
 ################################################################################################################################################
 
 ################################################### Configuration ##########################################################################
-# Configuration file. Default option = mbackup.conf
+# Configuration file. Default option = $install_dir/mbackup.conf
 conf_file=''
 # This is to make sure 'clear' is not a custom alias such as 'printf "\033c"'. The reason is because causes the mbackup CLI to have delays.
 alias clear="\clear"
@@ -95,7 +95,7 @@ function device_check() {
 }
 
 function infor(){
-	if device_check; then	df -h "$Device"; umount -f "$Device"; fi
+	if device_check; then	df -h "$Device"; if [ "$automount" = "yes" ]; then umount -f "$Device"; fi; fi
 }
 
 function backup(){
@@ -113,7 +113,7 @@ function backup(){
 	done
 	find "$BkPath" -type d -exec chmod -R 770 {} \;
 	find "$BkPath" -type f -exec chmod -R 660 {} \;
-	if [ -n "$Device" ]; then
+	if [ -n "$Device" -a "$automount" = "yes" ]; then
 		umount -f "$Device"
 	fi
 }
@@ -122,12 +122,10 @@ function open(){
 	if [ -n "$Device" ]; then
 		if ! device_check; then exit 1; fi
 	fi
-	clear
-	nautilus "$BkPath" & > /dev/null
-	echo "${bold}${green}Type enter when you finished...${reset}"
-	read pause
+	nautilus "$BkPath" 2>/dev/null &
+	read -p "${bold}${green}Type enter when you finished...${reset}"
 	nautilus -q
-	if [ -n "$Device" ]; then
+	if [ -n "$Device" -a "$automount" = "yes" ]; then
 		umount -f "$Device"
 	fi
 }
@@ -248,7 +246,7 @@ function recovery(){
 		done
 	done
 	cd
-	if [ -n "$Device" ]; then
+	if [ -n "$Device" -a "$automount" = "yes" ]; then
 		umount -f "$Device"
 	fi
 }
@@ -282,7 +280,7 @@ function clean(){
 			fi
 		fi
 	done
-	if [ -n "$Device" ]; then
+	if [ -n "$Device" -a "$automount" = "yes" ]; then
 		umount -f "$Device"
 	fi
 }

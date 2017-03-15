@@ -1,6 +1,6 @@
 **Name:** MyBackup
 
-**Version:** 4.2.1-beta
+**Version:** 4.2.2-beta
 
 **Author:** Aren GamerZ
 

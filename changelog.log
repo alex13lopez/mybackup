@@ -1,4 +1,4 @@
-#### CHANGE LOG 4.2.1-beta ####
+#### CHANGE LOG 4.2.2-beta ####
 
 1. Now the function clear is even more optimized than in version 3.0b because now it searches only the files that are older than the number you
    indicated in the variable $days, by default this variable is set up to 30.
@@ -24,3 +24,7 @@ created on backup folder (copied to backup). This was a fail of implementation, 
         - Added '-e' option to read in recovery, so you can tabulate to autocomplete paths
         - Improved sed expression in device_check()
         - Added installer.sh, that does the job of installing and configuring for you :)
+
+11. Improved open() function: Now nautilus doesn't print annoying messages
+
+12. Added the option of not auto umount devices if automount is set to 'no'
