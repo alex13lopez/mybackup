@@ -1,4 +1,4 @@
-#### CHANGE LOG 4.2.2-beta ####
+#### CHANGE LOG 4.2.3-beta ####
 
 1. Now the function clear is even more optimized than in version 3.0b because now it searches only the files that are older than the number you
    indicated in the variable $days, by default this variable is set up to 30.
@@ -27,4 +27,10 @@ created on backup folder (copied to backup). This was a fail of implementation, 
 
 11. Improved open() function: Now nautilus doesn't print annoying messages
 
-12. Added the option of not auto umount devices if automount is set to 'no'
+12. Added the option of not autounmount devices if automount is set to 'no'
+
+What's new:
+
+13. Added a vars checker at the beginning (end of the file, but before starts doing things) to avoid error messages
+
+14. Added $user variable, to set this $user as the new owner when recovering files.

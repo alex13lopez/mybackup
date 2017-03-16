@@ -4,7 +4,7 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 4.2.2-beta
+# Version: 4.2.3-beta
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration.
 # More IMPORTANT: This script is in BETA version, so report any bugs to me please.
@@ -14,14 +14,14 @@
 ################################################################################################################################################
 
 ################################################### Configuration ##########################################################################
-# Configuration file. Default option = $install_dir/mbackup.conf
-conf_file=''
+# Configuration file. Default option (if you used installer.sh) = /opt/myBackup/mbackup.conf
+conf_file='/opt/myBackup/mbackup.conf'
 # This is to make sure 'clear' is not a custom alias such as 'printf "\033c"'. The reason is because causes the mbackup CLI to have delays.
 alias clear="\clear"
 # Same as clear but with ls.
 alias ls="\ls"
 # Loading configuration
-source $conf_file
+source $conf_file 2>/dev/null
 ############################################################################################################################################
 
 
@@ -210,8 +210,7 @@ function recovery(){
 						elif ! [ -d $rescue_path ]; then
 							mkdir "$rescue_path"
 							cp -Rv "$path/$npath/$recover" "$rescue_path"
-							find "$rescue_path" -type f -exec chmod 666 "{}" \;
-							find "$rescue_path" -type d -exec chmod 777 "{}" \;
+							find "$rescue_path" -uid 0 -exec chown -R $user:$user "{}" \;
 						else
 							echo; echo "${red}${bold}Error: $rescue_path already exists and is not a folder${reset}"
 							break
@@ -318,7 +317,32 @@ function menu(){
 	done
 }
 
-if [[ $EUID -ne 0 ]]; then echo "${red}You need root privileges to run this script!${reset}"
+
+# Checking everything is set up correctly before even checking permisions
+var_list=("$BkPath" "$DPath" "$DtoBackup" "$Device" "$automount" "$days" "$default_rescue" "$hidden_files" "$verbose" "$user")
+path_list=("$BkPath" "$DPath")
+
+if [ -z "$conf_file" ]; then
+	echo "${red}Error: You didn't set up a configuration file! Check out mbackup.sh!${reset}"
+	exit 1
+else
+	for var in ${var_list[@]}; do
+		if [ -z "$var" ]; then
+			echo "${red}Error: Some variable is not set up correctly! Check out mbackup.conf! ${reset}"
+			exit 1
+		fi
+	done
+
+	for var in ${path_list[@]}; do
+		if [ ! -d "$var" ]; then
+			echo "${red}Error: Some path does not exist! Check out mbackup.conf! ${reset}"
+			exit 1
+		fi
+	done
+fi
+
+# Checking if root is the one executing this script, else exits with error code
+if [[ $EUID -ne 0 ]]; then echo "${red}You need root privileges to run this script!${reset}"; exit 1
 else
 	if [[ $# -eq 0 ]]; then menu
 	elif [[ $# -eq 1 ]]; then

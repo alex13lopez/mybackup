@@ -23,6 +23,7 @@ DPath=$(echo "$DPath" | sed 's|/$||')
 read -a DtoBackup -ep "Which specific dirs you want to backup?(leave empty if you want the entire $DPath)(separated by spaces, and between ''):  "
 read -p "How many days do you want the files to be kept in the backup, since they were deleted?[Default: 30]: " days
 read -ep "Where recovered files will be restored to by default?[Default: $DPath/rescued]:" default_rescue
+read -ep "What will be the owner of the recovered files?(your username):  " user
 read -p "Should hidden files be shown?[Default: hide](hide/show): " hidden_files
 read -p "Should device_check() be verbose?[Default: false](true/false): " verbose
 
@@ -49,3 +50,9 @@ if [ -n "$default_rescue" ]; then sed -i "/default_rescue/s|=.*|='$default_rescu
 if [ -n "$hidden_files" ]; then sed -i "/hidden_files/s|=.*|='$hidden_files'|" $install_dir/mbackup.conf; fi
 if [ -n "$verbose" ]; then sed -i "/verbose/s|=.*|='$verbose'|" $install_dir/mbackup.conf; fi
 sed -i "/conf_file/s|=.*|='$install_dir/mbackup.conf'|" $install_dir/mbackup.sh
+if [ -n "$user" ]; then
+  sed -i "/user/s|=.*|='$user'|" $install_dir/mbackup.sh
+else
+  echo "You did not indicate a user! Go to $install_dir/mbackup.conf and set it up!"
+  exit 1
+fi
