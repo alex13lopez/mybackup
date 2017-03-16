@@ -1,6 +1,6 @@
 **Name:** MyBackup
 
-**Version:** 4.2.3-beta
+**Version:** 4.2.5-beta
 
 **Author:** Aren GamerZ
 
@@ -10,7 +10,7 @@
 
 **Important:** You have to check the source to manually setup the program to suit your needs, also make sure to read the changelog.log
 
-**Configuration is easy**: You **ONLY** have to **CHANGE THE VARS AS INDICATED in the mbackup.conf file or indicate another file in mbackup.sh**
+**Configuration is easy**: You can use installer.sh to install the mbackup, if you want to keep your current configuration, installer.sh will ask you before modifying anything.
 
 **IMPORTANT NEWS:** In a few months this program will enter in the final release state, that means no more features will be added.
 
