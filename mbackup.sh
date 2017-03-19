@@ -4,7 +4,7 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 4.2.5-beta
+# Version: 4.3.0-beta
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration.
 # More IMPORTANT: This script is in BETA version, so report any bugs to me please.
@@ -40,12 +40,12 @@ function usage(){
 	echo """Usage: mbackup <OPTION>
        OPTION:
 		<noargs>      -->  Goes to main menu
-		-b --backup   -->  Performs a backup and exits
-		-c --clean    -->  Performs a clean of older removed files and exits
-		-o --open     -->  Opens the backup device with nautilus and exits
-		-r --recovery -->  Goes directly to recovery CLI
-		-i --info     -->  Shows info about the backup device
-		-h --help     -->  Shows this help"""
+		-b   					-->  Performs a backup and exits
+		-c   					-->  Performs a clean of older removed files and exits
+		-o   					-->  Opens the backup device with nautilus and exits
+		-r	 					-->  Goes directly to recovery CLI
+		-i 	 					-->  Shows info about the backup device
+		-h   					-->  Shows this help"""
 
 }
 
@@ -233,7 +233,8 @@ function recovery(){
 				break
 			else
 				if [ ! -d "$npath" ]; then
-					echo; echo "${red}Error: that is not a directory, please, choose directories only"
+					echo "${red}Error: that is not a directory, please, choose directories only"
+					sleep 2.5
 					break
 				else
 					path="$path/$npath"
@@ -345,19 +346,18 @@ fi
 if [[ $EUID -ne 0 ]]; then echo "${red}You need root privileges to run this script!${reset}"; exit 1
 else
 	if [[ $# -eq 0 ]]; then menu
-	elif [[ $# -eq 1 ]]; then
-		case $1 in
-			-b|--backup) backup ;;
-			-o|--open) open ;;
-			-r|--recovery) recovery ;;
-			-c|--clean) clean ;;
-			-i|--info) infor ;;
-			-h|--help) usage ;;
-			*) echo "${red}Parameter error!${reset}"; echo; usage ;;
-		esac
 	else
-		echo "${red}Parameter error!${reset}"
-		usage
+		while getopts ":b :o :r :c :i :h" OPT; do
+			case "$OPT" in
+				b) backup ;;
+				o) open ;;
+				r) recovery ;;
+				c) clean ;;
+				i) infor ;;
+				h) usage ;;
+				\?) echo "${red}Invalid option: -$OPTARG${reset}"; usage; exit 1
+			esac
+		done
 	fi
 fi
 exit 0
