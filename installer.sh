@@ -19,8 +19,8 @@ else
   for file in $(ls -1 | grep -v "installer" | grep -v "mbackup.conf"); do
     cp "$file" "$install_dir"
   done
-  chmod 755 $install_dir/mbackup.sh
-  ln -sf $install_dir/mbackup.sh /sbin/mbackup
+  chmod 755 "$install_dir/mbackup.sh"
+  ln -sf "$install_dir/mbackup.sh /sbin/mbackup"
 
   # Beginning set up
   read -p "Do you want to set up mbackup.conf now?[y/n]: " choice
@@ -46,22 +46,22 @@ else
     read -p "Should device_check() be verbose?[Default: false](true/false): " verbose
 
     # Modifying mbackup.conf skeleton
-    sed -i "/BkPath/s|=.*|='$BkPath'|"  $install_dir/mbackup.conf
-    sed -i "/DPath/s|=.*|='$DPath'|"  $install_dir/mbackup.conf
+    sed -i "/BkPath/s|=.*|='$BkPath'|"  "$install_dir/mbackup.conf"
+    sed -i "/DPath/s|=.*|='$DPath'|"  "$install_dir/mbackup.conf"
     if [ -n "$Device" ]; then
-      sed -i "/Device/s|=.*|='$Device'|" $install_dir/mbackup.conf
+      sed -i "/Device/s|=.*|='$Device'|" "$install_dir/mbackup.conf"
       if [ -n "$automount" ]; then
-        sed -i "/automount/s|=.*|='$automount'|" $install_dir/mbackup.conf
+        sed -i "/automount/s|=.*|='$automount'|" "$install_dir/mbackup.conf"
       fi
     fi
-    if [ -z "$DtoBackup" ]; then DtoBackup='*'; sed -i "/DtoBackup/s|=.*|='$DtoBackup'|" $install_dir/mbackup.conf; else sed -i "/DtoBackup/s|=.*|=(${DtoBackup[*]})|" $install_dir/mbackup.conf; fi
-    if [ -n "$days" ]; then sed -i "/days/s|=.*|='$days'|" $install_dir/mbackup.conf; fi
-    if [ -n "$default_rescue" ]; then sed -i "/default_rescue/s|=.*|='$default_rescue'|" $install_dir/mbackup.conf; fi
-    if [ -n "$hidden_files" ]; then sed -i "/hidden_files/s|=.*|='$hidden_files'|" $install_dir/mbackup.conf; fi
-    if [ -n "$verbose" ]; then sed -i "/verbose/s|=.*|='$verbose'|" $install_dir/mbackup.conf; fi
-    sed -i "/conf_file/s|=.*|='$install_dir/mbackup.conf'|" $install_dir/mbackup.sh
+    if [ -z "$DtoBackup" ]; then DtoBackup="*"; sed -i "/DtoBackup/s|=.*|='$DtoBackup'|" "$install_dir/mbackup.conf"; else sed -i "/DtoBackup/s|=.*|=(${DtoBackup[*]})|" "$install_dir/mbackup.conf"; fi
+    if [ -n "$days" ]; then sed -i "/days/s|=.*|='$days'|" "$install_dir/mbackup.conf"; fi
+    if [ -n "$default_rescue" ]; then sed -i "/default_rescue/s|=.*|='$default_rescue'|" "$install_dir/mbackup.conf"; fi
+    if [ -n "$hidden_files" ]; then sed -i "/hidden_files/s|=.*|='$hidden_files'|" "$install_dir/mbackup.conf"; fi
+    if [ -n "$verbose" ]; then sed -i "/verbose/s|=.*|='$verbose'|" "$install_dir/mbackup.conf"; fi
+    sed -i "/conf_file/s|=.*|='$install_dir/mbackup.conf'|" "$install_dir/mbackup.sh"
     if [ -n "$user" ]; then
-      sed -i "/user/s|=.*|='$user'|" $install_dir/mbackup.conf
+      sed -i "/user/s|=.*|='$user'|" "$install_dir/mbackup.conf"
     else
       echo "You did not indicate a user! Go to $install_dir/mbackup.conf and set it up!"
       exit 1

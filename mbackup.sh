@@ -4,7 +4,7 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 4.3.0-beta
+# Version: 4.3.1-beta
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration.
 # More IMPORTANT: This script is in BETA version, so report any bugs to me please.
@@ -37,15 +37,15 @@ green=$(tput setaf 2)
 
 
 function usage(){
-	echo """Usage: mbackup <OPTION>
+	printf "Usage: mbackup <OPTION>
        OPTION:
-		<noargs>      -->  Goes to main menu
-		-b   					-->  Performs a backup and exits
-		-c   					-->  Performs a clean of older removed files and exits
-		-o   					-->  Opens the backup device with nautilus and exits
-		-r	 					-->  Goes directly to recovery CLI
-		-i 	 					-->  Shows info about the backup device
-		-h   					-->  Shows this help"""
+			 <noargs>   -->  Goes to main menu
+			 -b         -->  Performs a backup and exits
+			 -c         -->  Performs a clean of older removed files and exits
+			 -o         -->  Opens the backup device with nautilus and exits
+			 -r         -->  Goes directly to recovery CLI
+			 -i         -->  Shows info about the backup device
+			 -h         -->  Shows this help\n"
 
 }
 
@@ -101,7 +101,9 @@ function backup(){
 	if [ -n "$Device" ]; then
 		if ! device_check; then	exit 1; fi
 	fi
-	for dir in "${DtoBackup[@]}"
+	# Here I don't double quote because otherwise the expansion '*' (in case you've chosen to backup everything) won't happen
+	# so, that's the reason single quoting paths it's so IMPORTANT (DtoBackup=('/path/1' '/path/2'))
+	for dir in ${DtoBackup[@]}
 	do
 		if [[ ! -e $dir  ]]; then
 			echo "${yellow}Warning: Directory $dir does not exist, please make sure you typed the path correctly, skipping...${reset}"
@@ -131,15 +133,15 @@ function open(){
 
 function available_commands() {
 	clear
-	echo """Available Commands
+	printf "Available Commands
 			 OPTION:
-			 ..			--> Goes to parent folder
-			 r			--> Enters recovery mode
-			 n			--> Enters navigation mode
-			 q			--> Quits program
-			 hide		--> Hides hidden files
-			 show		--> Shows hidden files
-			 h      --> Shows this help"""
+			 ..     --> Goes to parent folder
+			 r      --> Enters recovery mode
+			 n      --> Enters navigation mode
+			 q      --> Quits program
+			 hide   --> Hides hidden files
+			 show   --> Shows hidden files
+			 h      --> Shows this help\n"
 	echo; read -p "${green}Press enter to continue...${reset}"
 	clear
 }
@@ -258,10 +260,10 @@ function clean(){
 	date_today=$(date "+%s")
 	find "$BkPath" -mindepth 1 | while read bfile
 	do
-		dfile=$(echo "$bfile" | sed "s|$BkPath|$DPath|")
+		dfile=${bfile//$BkPath/$DPath}
 		access_date="$(date -d "$(stat -c %x "$bfile" | cut -d" " -f1)" "+%s")"
 		# The '86400' is to transform seconds directly to days
-		date_difference="$((($date_today-$access_date)/86400))"
+		date_difference="$(((date_today-access_date)/86400))"
 		if [[ ! -e "$dfile" ]]; then
 			if [[ "$date_difference" -ge "$days" ]]; then
 				echo "${red}File $dfile not found and is $days days older in the backup so deleting from backup...${reset}"
