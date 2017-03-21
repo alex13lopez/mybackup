@@ -20,7 +20,7 @@ else
     cp "$file" "$install_dir"
   done
   chmod 755 "$install_dir/mbackup.sh"
-  ln -sf "$install_dir/mbackup.sh /sbin/mbackup"
+  ln -sf "$install_dir/mbackup.sh" "/sbin/mbackup"
 
   # Beginning set up
   read -p "Do you want to set up mbackup.conf now?[y/n]: " choice
@@ -54,7 +54,7 @@ else
         sed -i "/automount/s|=.*|='$automount'|" "$install_dir/mbackup.conf"
       fi
     fi
-    if [ -z "$DtoBackup" ]; then DtoBackup="*"; sed -i "/DtoBackup/s|=.*|='$DtoBackup'|" "$install_dir/mbackup.conf"; else sed -i "/DtoBackup/s|=.*|=(${DtoBackup[*]})|" "$install_dir/mbackup.conf"; fi
+    if [ -z "$DtoBackup" ]; then sed -i '/DtoBackup/s|=.*|="$DPath/*"|' "$install_dir/mbackup.conf"; else sed -i "/DtoBackup/s|=.*|=(${DtoBackup[*]})|" "$install_dir/mbackup.conf"; fi
     if [ -n "$days" ]; then sed -i "/days/s|=.*|='$days'|" "$install_dir/mbackup.conf"; fi
     if [ -n "$default_rescue" ]; then sed -i "/default_rescue/s|=.*|='$default_rescue'|" "$install_dir/mbackup.conf"; fi
     if [ -n "$hidden_files" ]; then sed -i "/hidden_files/s|=.*|='$hidden_files'|" "$install_dir/mbackup.conf"; fi

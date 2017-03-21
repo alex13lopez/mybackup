@@ -4,7 +4,7 @@
 # Name: myBackup
 # Author: ArenGamerZ
 # Email: arendevel@gmail.com
-# Version: 4.3.1-beta
+# Version: 4.3.1.1-beta
 # Description: This is a Backup program that will help you to maintain, adminstrate and make your backup.
 # Important: Set the vars below to suit your configuration.
 # More IMPORTANT: This script is in BETA version, so report any bugs to me please.
